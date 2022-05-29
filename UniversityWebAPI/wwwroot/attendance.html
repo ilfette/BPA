@@ -1,0 +1,319 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Присутствие</title>
+    <!--<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.0/css/bootstrap.min.css" rel="stylesheet" />-->
+    <link href="css/Student.css" rel="stylesheet" />
+</head>
+<body>
+    <div class="menu">
+        <a href="index.html">Журнал</a>
+        <a href="student.html">Студенты</a>
+        <a href="lector.html">Лекторы</a>
+        <a href="lection.html">Лекции</a>
+        <a href="lectionlectors.html">Расписание</a>
+    </div>
+
+    <h2>Посещение</h2>
+
+    <!--<form name="AttendanceForm" id="formst">-->
+    <table class="table table-condensed table-striped  col-md-6">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Имя</th>
+                <th>Присутствие</th>
+                <th>Оценка</th>
+                <th>Сохранение</th>
+            </tr>
+        </thead>
+        <tbody>
+        </tbody>
+    </table>
+
+    <!--</form>-->
+    <!--
+        <input type="hidden" name="id" value="0" />
+        <div class="form-group col-md-5">
+            <label for="name">Имя:</label><br />
+            <input class="form-control" name="name" />
+        </div>
+        <div class="form-group col-md-5">
+            <label for="attend">Был/не был:</label><br />
+            <input class="form-control" name="attend" />
+        </div>
+        <div class="form-group col-md-5">
+            <label for="mark">Оценка:</label><br />
+            <input class="form-control" name="mark" />
+        </div>
+        <div class="panel-body">
+            <button type="submit" id="submit" class="btn btn-primary btmsave">Сохранить</button>
+            <a id="reset" class="btn btn-primary btmres" onmousedown="reset()">Сбросить</a>
+        </div>
+        </form>-->
+
+
+
+
+    <script>
+        var cnt;
+        var paramsString = document.location.search; // ?page=4&limit=10&sortby=desc  
+        var searchParams = new URLSearchParams(paramsString);
+
+       var id= searchParams.get("id");
+        
+        // Получение всех пользователей
+        async function GetAttendance() {
+            // отправляет запрос и получаем ответ
+            const response = await fetch("/api/attendance", {
+                method: "GET",
+                headers: { "Accept": "application/json" }
+            });
+            // если запрос прошел нормально
+            if (response.ok === true) {
+                // получаем данные
+                // alert(1);
+                const attend = await response.json();
+                let rows = document.querySelector("tbody");
+                cnt = 0;
+                attend.forEach(user => {
+                    // добавляем полученные элементы в таблицу
+                    if (user.lrLnId==window.id)
+                    rows.append(row(user));
+                });
+            }
+        }
+
+
+
+        async function SaveAttendance(id, studid, lrLnId ,status, mark) {
+            console.log("id", id);
+            console.log("studid", studid);
+            console.log("lrLnId", lrLnId);
+            console.log("status", status);
+            console.log("mark", mark);
+            const response = await fetch("api/attendance", {
+                method: "PUT",
+                headers: { "Accept": "application/json", "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    id: parseInt(id, 10),
+                    studentId: studid,
+                    lrLnId: lrLnId,
+                    status: status,
+                    mark: mark
+                })
+            });
+            if (response.ok === true) {
+                const user = await response.json();
+               // reset();
+                document.querySelector("tr[data-rowid='" + user.id + "']").replaceWith(row(user));
+            }
+        }
+
+        async function DeleteAttendance(id) {
+            const response = await fetch("/api/attendance/" + id, {
+                method: "DELETE",
+                headers: { "Accept": "application/json" }
+            });
+            if (response.ok === true) {
+                const user = await response.json();
+                document.querySelector("tr[data-rowid='" + user.id + "']").remove();
+            }
+        }
+
+
+        // создание строки для таблицы
+        function row(user) {
+            // alert(user.id);
+
+
+
+
+            const tr = document.createElement("tr");
+            tr.setAttribute("data-rowid", user.id);
+
+
+
+            const idTd = document.createElement("td");
+            idTd.append(user.id);
+            tr.append(idTd);
+            window.a = user.id + 1;
+
+
+
+            const studTd = document.createElement("td");
+            studTd.append(user.studentId);
+            tr.append(studTd);
+
+
+            var check1 = "status" + user.id;
+            const check = document.createElement("input");
+            check.setAttribute("type", "checkbox");
+            console.log('stat',user.status);
+            if (user.status == 1) {
+                check.checked = true;
+            } else {
+                check.checked = false;
+            }
+            check.setAttribute("value", "1");
+            check.setAttribute("id", check1);
+            check.append("был/не был");
+            tr.appendChild(check);
+
+
+            var mark1= "mark"+user.id;
+            const mark = document.createElement("input");
+            mark.setAttribute("type", "number");
+            mark.setAttribute("id", mark1);
+            mark.setAttribute("value", user.mark);
+            tr.appendChild(mark);
+
+
+
+
+            const linksTd = document.createElement("td");
+
+
+          //  alert(document.querySelector("input[name='mark']").value);
+            const editLink = document.createElement("a");
+            editLink.setAttribute("data-id", user.id);
+            editLink.setAttribute("style", "cursor:pointer;padding:15px;");
+            editLink.append("Сохранить");
+            editLink.addEventListener("click", e => {
+                e.preventDefault();
+                let stat;
+                if (document.getElementById(check1).value == 1) {
+                    stat = 1;
+                }
+                else {
+                    stat = 0;
+                }
+                let usermark = document.getElementById(mark1).value;
+                 //   querySelector('input[name=' + mark1 + ']').value;
+              //  alert(usermark);
+                //DeleteAttendance(user.id);
+                SaveAttendance(user.id, user.studentId, user.lrLnId, stat, usermark);
+            });
+            linksTd.append(editLink);
+            tr.appendChild(linksTd);
+
+
+
+
+            cnt++;
+            return tr;
+
+
+            //  const form = document.createElement("form");
+            //  form.setAttribute("name", "AttendanceForm");
+            //  form.setAttribute("id", "formst");
+
+
+
+            //  const tr = document.createElement("tr");
+            //  tr.setAttribute("data-rowid", user.id);
+            //  form.append(tr);
+
+
+
+            //  const idTd = document.createElement("td");
+            //  idTd.append(user.id);
+            //  tr.append(idTd);
+            //  window.a = user.id + 1;
+
+
+
+            //  const studTd = document.createElement("td");
+            //  studTd.append(user.studentId);
+            //  tr.append(studTd);
+
+
+
+            //  const check = document.createElement("input");
+            //  check.setAttribute("type", "checkbox");
+            //  check.setAttribute("name", "status");
+            //  check.append("был/не был");
+            //  tr.appendChild(check);
+
+
+
+            //  const mark = document.createElement("input");
+            //  mark.setAttribute("type", "number");
+            //  mark.setAttribute("name", "mark");
+            //  mark.setAttribute("value", user.mark);
+            //  mark.append("Оценка");
+            //  tr.appendChild(mark);
+
+
+
+            //  const tableid = document.createElement("input");
+            //  tableid.setAttribute("type", "number");
+            //  tableid.style.display = "none";
+            //  tableid.setAttribute("name", "tableid");
+            //  tableid.setAttribute("value", user.id);
+            //  tr.appendChild(tableid);
+
+
+
+            //  const studid = document.createElement("input");
+            //  studid.setAttribute("type", "number");
+            //  studid.style.display = "none";
+            //  studid.setAttribute("name", "studentid");
+            //  studid.setAttribute("value", user.studentId);
+            //  tr.appendChild(studid);
+
+            //  ///////////////////////////
+            //  const removeLink = document.createElement("a");
+            //  removeLink.setAttribute("data-id", user.id);
+            //  removeLink.setAttribute("style", "cursor:pointer;padding:15px;");
+            //  removeLink.append("Удалить");
+            //  removeLink.addEventListener("click", e => {
+
+            //      e.preventDefault();
+            //      (user.id);
+            //      window.location.reload();
+            //  });
+            //  ///////////////////////////
+
+            //  const submitbtn = document.createElement("button");
+            ////  submitbtn.setAttribute("type", "submit");
+            ////  submitbtn.setAttribute("id", "submit");
+            ////  submitbtn.setAttribute("value", "Сохранить");
+            //////  submitbtn.setAttribute("class", "btn btn-primary btmsave");
+            //// //mark.append("Сохранить");
+            ////  tr.appendChild(submitbtn);
+
+
+            ////  cnt++;
+            ////  return tr;
+        }
+
+
+
+        var a;
+
+
+
+        //document.forms["AttendanceForm"].addEventListener("submit", e => {
+        //    e.preventDefault();
+        //    const form = document.forms["AttendanceForm"];
+        //    const id = form.elements["tableid"].value;
+        //    const studid = form.elements["studentid"].value;
+        //    const status = form.elements["status"].value;
+        //    const mark = form.elements["mark"].value;
+        //    console.log(id);
+        //    SaveAttendance(id, studid, status, mark);
+        //});
+
+
+
+
+        // загрузка пользователей
+        GetAttendance();
+
+
+
+    </script>
+</body>
+</html>
