@@ -22,7 +22,7 @@
         <thead>
             <tr>
                 <th>Id</th>
-                <th>Имя</th>
+                <th>Id Студента</th>
                 <th>Присутствие</th>
                 <th>Оценка</th>
                 <th>Сохранение</th>
@@ -84,6 +84,7 @@
                 });
             }
         }
+       
 
 
 
@@ -141,15 +142,19 @@
             window.a = user.id + 1;
 
 
-
-            const studTd = document.createElement("td");
+            const studTd = document.createElement("td");           
             studTd.append(user.studentId);
             tr.append(studTd);
 
 
+            const studTd1 = document.createElement("td");         
+         
+
             var check1 = "status" + user.id;
             const check = document.createElement("input");
             check.setAttribute("type", "checkbox");
+            check.setAttribute("class", "inputatt");
+           // check.style.padding='50px';
             console.log('stat',user.status);
             if (user.status == 1) {
                 check.checked = true;
@@ -159,16 +164,20 @@
             check.setAttribute("value", "1");
             check.setAttribute("id", check1);
             check.append("был/не был");
-            tr.appendChild(check);
+            studTd1.appendChild(check);
+            tr.appendChild(studTd1);
 
 
+            const studTd2 = document.createElement("td");
             var mark1= "mark"+user.id;
             const mark = document.createElement("input");
+            mark.setAttribute("class", "inputatt");
             mark.setAttribute("type", "number");
             mark.setAttribute("id", mark1);
             mark.setAttribute("value", user.mark);
             tr.appendChild(mark);
-
+            studTd2.appendChild(mark);
+            tr.appendChild(studTd2);
 
 
 

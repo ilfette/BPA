@@ -32,6 +32,7 @@ namespace UniversityWebAPI.Controllers
             return await db.Attendances.ToListAsync();
         }
 
+       
         //// возвращает лекцию по переданному id.
         //[HttpGet("{id}")]
         //public async Task<ActionResult<Lection>> Get(int id)
@@ -55,8 +56,8 @@ namespace UniversityWebAPI.Controllers
             return Ok(lection);
         }
 
-      //  получает данные из запроса и изменяет ими объект в базе данных
-       [HttpPut]
+        //  получает данные из запроса и изменяет ими объект в базе данных
+        [HttpPut]
         public async Task<ActionResult<Attendance>> Put(Attendance lection)
         {
             if (lection == null)
